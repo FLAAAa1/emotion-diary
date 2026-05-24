@@ -4,7 +4,14 @@ import os
 from typing import Optional, List, Dict, Any
 from urllib.parse import urlparse
 
+# Read API_URL from env var (local) or Streamlit secrets (Cloud)
 API_URL = os.getenv("API_URL", "")
+if not API_URL:
+    try:
+        API_URL = st.secrets["API_URL"]
+    except Exception:
+        pass
+
 
 def _api_url() -> str:
     if API_URL:
