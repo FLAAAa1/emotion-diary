@@ -7,6 +7,8 @@ if "token" not in st.session_state:
     st.warning("请先登录")
     st.switch_page("pages/login.py")
     st.stop()
+from frontend.theme import load_and_apply
+load_and_apply()
 
 st.title("📔 情绪日记")
 

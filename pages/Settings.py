@@ -10,6 +10,8 @@ if 'token' not in st.session_state:
     st.warning('请先登录')
     st.switch_page('pages/login.py')
     st.stop()
+from frontend.theme import load_and_apply
+load_and_apply()
 
 settings_data = get_settings()
 lang = settings_data.get('language', 'zh') if settings_data else 'zh'
