@@ -128,3 +128,4 @@ with tab_about:
 
 if st.sidebar.button(_('back'), use_container_width=True):
     st.switch_page('streamlit_app.py')
+

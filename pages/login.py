@@ -1,10 +1,7 @@
 ﻿import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-
 import streamlit as st
 from frontend.api import login, register
-
-st.set_page_config(page_title="登录", page_icon="🔐")
 
 st.title("🔐 欢迎来到情绪日记")
 
@@ -26,7 +23,7 @@ with tab1:
                     st.session_state.token = result["access_token"]
                     st.session_state.nickname = nick
                     st.success("登录成功！")
-                    st.switch_page("streamlit_app.py")
+                    st.rerun()
 
 with tab2:
     with st.form("register_form"):
