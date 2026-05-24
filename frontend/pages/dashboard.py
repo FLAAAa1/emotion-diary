@@ -1,0 +1,43 @@
+﻿import streamlit as st
+import pandas as pd
+from frontend.api import get_mood_timeline, get_mood_stats
+
+st.set_page_config(page_title="情绪仪表盘", page_icon="📊")
+
+if "token" not in st.session_state:
+    st.warning("请先登录")
+    st.switch_page("pages/login.py")
+    st.stop()
+
+st.title("📊 情绪仪表盘")
+
+# ── Mood Timeline Chart ───────────────────────────────────────────────────
+st.header("情绪时间线")
+timeline = get_mood_timeline()
+
+if timeline:
+    df = pd.DataFrame(timeline)
+    df["created_at"] = pd.to_datetime(df["created_at"])
+    df = df.sort_values("created_at")
+
+    if "emotion_score" in df.columns and df["emotion_score"].notna().any():
+        st.line_chart(df.set_index("created_at")["emotion_score"])
+    else:
+        st.info("暂无情绪评分数据。接入大模型后将自动生成情绪分数。")
+
+    st.dataframe(
+        df[["created_at", "title", "mood", "emotion_score"]],
+        use_container_width=True,
+        hide_index=True,
+    )
+else:
+    st.info("暂无日记数据")
+
+# ── Mood Distribution ─────────────────────────────────────────────────────
+st.header("心情分布")
+stats = get_mood_stats()
+if stats:
+    df_stats = pd.DataFrame(stats)
+    st.bar_chart(df_stats.set_index("mood"))
+else:
+    st.info("暂无心情分布数据")
