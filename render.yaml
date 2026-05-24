@@ -1,0 +1,14 @@
+﻿# Render deployment config for FastAPI backend
+services:
+  - type: web
+    name: emotion-diary-api
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true
+      - key: LLM_PROVIDER
+        value: deepseek
+      - key: LLM_API_KEY
+        sync: false

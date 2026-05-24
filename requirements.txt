@@ -1,2 +1,4 @@
-﻿-r backend/requirements.txt
--r frontend/requirements.txt
+﻿streamlit>=1.38.0
+requests>=2.32.0
+pandas>=2.2.0
+plotly>=5.22.0
