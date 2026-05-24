@@ -1,8 +1,11 @@
 ﻿import os
-from dotenv import load_dotenv
+from pathlib import Path
 
-# Load .env from project root (emotion-diary/)
-load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env"))
+# Load .env only if it exists (local dev); on Render, env vars come from dashboard
+_dotenv_path = Path(__file__).parent.parent / ".env"
+if _dotenv_path.exists():
+    from dotenv import load_dotenv
+    load_dotenv(_dotenv_path)
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
