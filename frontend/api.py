@@ -2,7 +2,6 @@
 import requests
 import os
 from typing import Optional, List, Dict, Any
-from urllib.parse import urlparse
 
 # Read API_URL from env var (local) or Streamlit secrets (Cloud)
 API_URL = os.getenv("API_URL", "")
@@ -16,13 +15,7 @@ if not API_URL:
 def _api_url() -> str:
     if API_URL:
         return API_URL
-    try:
-        host = urlparse(st.context.server.address).hostname if st.context.server.address else None
-    except Exception:
-        host = None
-    if not host or host in ("0.0.0.0", "::"):
-        host = "127.0.0.1"
-    return f"http://{host}:8000"
+    return "http://127.0.0.1:8000"
 
 
 def _headers() -> dict:
