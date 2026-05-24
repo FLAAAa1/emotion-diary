@@ -1,6 +1,5 @@
 ﻿import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-
 import streamlit as st
 import pandas as pd
 from frontend.api import get_mood_timeline, get_mood_stats
@@ -11,11 +10,11 @@ if "token" not in st.session_state:
     st.warning("请先登录")
     st.switch_page("pages/login.py")
     st.stop()
+
 from frontend.theme import load_and_apply
 load_and_apply()
 
-st.title("📊 情绪仪表盘")
-
+st.title("E 情绪仪表盘")
 st.header("情绪时间线")
 timeline = get_mood_timeline()
 if timeline:
@@ -25,15 +24,13 @@ if timeline:
     if "emotion_score" in df.columns and df["emotion_score"].notna().any():
         st.line_chart(df.set_index("created_at")["emotion_score"])
     else:
-        st.info("暂无情绪评分数据。接入大模型后将自动生成情绪分数。")
-    st.dataframe(df[["created_at", "title", "mood", "emotion_score"]], use_container_width=True, hide_index=True)
+        st.info("暂无情绪评分数据")
+    st.dataframe(df[["created_at","title","mood","emotion_score"]], use_container_width=True, hide_index=True)
 else:
     st.info("暂无日记数据")
-
 st.header("心情分布")
 stats = get_mood_stats()
 if stats:
-    df_stats = pd.DataFrame(stats)
-    st.bar_chart(df_stats.set_index("mood"))
+    st.bar_chart(pd.DataFrame(stats).set_index("mood"))
 else:
     st.info("暂无心情分布数据")
