@@ -4,8 +4,6 @@ import streamlit as st
 import pandas as pd
 from frontend.api import get_mood_timeline, get_mood_stats
 
-st.set_page_config(page_title="情绪仪表盘", page_icon="📊")
-
 if "token" not in st.session_state:
     st.warning("请先登录")
     st.switch_page("pages/login.py")
@@ -14,7 +12,6 @@ if "token" not in st.session_state:
 from frontend.theme import load_and_apply
 load_and_apply()
 
-st.title("E 情绪仪表盘")
 st.header("情绪时间线")
 timeline = get_mood_timeline()
 if timeline:
@@ -28,6 +25,7 @@ if timeline:
     st.dataframe(df[["created_at","title","mood","emotion_score"]], use_container_width=True, hide_index=True)
 else:
     st.info("暂无日记数据")
+
 st.header("心情分布")
 stats = get_mood_stats()
 if stats:

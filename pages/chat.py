@@ -3,8 +3,6 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 import streamlit as st
 from frontend.api import send_message, get_chat_history
 
-st.set_page_config(page_title="树洞对话", page_icon="🕳️")
-
 if "token" not in st.session_state:
     st.warning("请先登录")
     st.switch_page("pages/login.py")
@@ -13,7 +11,7 @@ if "token" not in st.session_state:
 from frontend.theme import load_and_apply
 load_and_apply()
 
-st.title("O 树洞对话")
+st.title("🕳️ 树洞对话")
 st.caption("在这里倾诉，我会认真倾听。")
 
 for msg in get_chat_history():
