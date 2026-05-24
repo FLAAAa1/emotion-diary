@@ -93,3 +93,27 @@ def get_mood_timeline() -> List[dict]:
 def get_mood_stats() -> List[dict]:
     resp = requests.get(f"{_api_url()}/dashboard/stats", headers=_headers())
     return resp.json() if resp.ok else []
+
+# ---- Settings ----
+
+def get_settings() -> dict:
+    resp = requests.get(f"{_api_url()}/api/settings", headers=_headers())
+    return resp.json() if resp.ok else {}
+
+def update_settings(**kwargs) -> bool:
+    resp = requests.put(f"{_api_url()}/api/settings", json=kwargs, headers=_headers())
+    return resp.ok
+
+def change_password(old_pw: str, new_pw: str) -> bool:
+    resp = requests.put(f"{_api_url()}/api/user/password", json={
+        "old_password": old_pw, "new_password": new_pw,
+    }, headers=_headers())
+    return resp.ok
+
+def delete_account() -> bool:
+    resp = requests.delete(f"{_api_url()}/api/user", headers=_headers())
+    return resp.status_code == 204
+
+def clear_chat_history() -> bool:
+    resp = requests.delete(f"{_api_url()}/chat/history", headers=_headers())
+    return resp.ok

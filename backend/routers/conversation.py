@@ -78,3 +78,8 @@ def get_history(
         )
         for m in messages
     ]
+
+@router.delete('/history', status_code=204)
+def clear_history(user_id: int = Depends(get_current_user), db: Session = Depends(get_db)):
+    db.query(Conversation).filter(Conversation.user_id == user_id).delete()
+    db.commit()

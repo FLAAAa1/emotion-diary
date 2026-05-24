@@ -1,5 +1,4 @@
-﻿from sqlalchemy import Column, Integer, String, DateTime, func
-
+﻿from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, func, Time
 from backend.database import Base
 
 
@@ -9,4 +8,5 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     nickname = Column(String(50), unique=True, nullable=False, index=True)
     password_hash = Column(String(128), nullable=False)
+    daily_reminder_time = Column(Time, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
