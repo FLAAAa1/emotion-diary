@@ -12,19 +12,29 @@ from frontend.theme import load_and_apply
 load_and_apply()
 
 st.subheader("🎭 陪伴角色")
-agents = list_agents()
-current = get_current_agent()
+try:
+    agents = list_agents()
+    current = get_current_agent()
+except Exception:
+    agents = []
+    current = None
 
-cols = st.columns(min(len(agents), 5) or 5)
-for i, agent in enumerate(agents):
-    with cols[i % 5]:
-        label = f"{agent['avatar']} {agent['name']}"
-        is_current = current and current['id'] == agent['id']
-        btn_label = f"{label} ✓" if is_current else label
-        if st.button(btn_label, key=f"agent_{agent['id']}", use_container_width=True):
-            switch_agent(agent['id'] if not is_current else None)
-            st.session_state.pop("_settings", None)
-            st.rerun()
+if agents:
+    cols = st.columns(min(len(agents), 5) or 5)
+    for i, agent in enumerate(agents):
+        with cols[i % 5]:
+            label = f"{agent['avatar']} {agent['name']}"
+            is_current = current and current.get('id') == agent['id']
+            btn_label = f"{label} ✓" if is_current else label
+            if st.button(btn_label, key=f"agent_{agent['id']}", use_container_width=True):
+                try:
+                    switch_agent(agent['id'] if not is_current else None)
+                    st.session_state.pop("_settings", None)
+                except Exception:
+                    st.error("切换失败")
+                st.rerun()
+else:
+    st.caption("⚠️ 无法加载角色列表")
 
 with st.expander("➕ 创建自定义角色"):
     with st.form("create_agent"):
