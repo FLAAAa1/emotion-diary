@@ -12,6 +12,8 @@ Base.metadata.create_all(bind=engine)
 db = SessionLocal()
 try:
     seed_agents(db)
+except Exception as e:
+    print(f"Seeder warning: {e}")
 finally:
     db.close()
 
@@ -37,3 +39,4 @@ app.include_router(agents.router)
 @app.get("/")
 async def root():
     return {"message": "Emotion Diary API is running"}
+
