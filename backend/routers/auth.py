@@ -5,7 +5,7 @@ from backend.database import get_db
 from backend.models.user import User
 from backend.models.settings import UserSettings
 from backend.schemas.user import UserRegister, UserLogin, TokenResponse, UserOut
-from backend.auth import hash_password, verify_password, create_access_token
+from backend.auth import hash_password, verify_password, create_access_token, validate_password
 
 router = APIRouter(prefix='/auth', tags=['auth'])
 
@@ -14,6 +14,10 @@ router = APIRouter(prefix='/auth', tags=['auth'])
 def register(payload: UserRegister, db: Session = Depends(get_db)):
     if db.query(User).filter(User.nickname == payload.nickname).first():
         raise HTTPException(status_code=400, detail='Nickname already taken')
+
+    err = validate_password(payload.password)
+    if err:
+        raise HTTPException(status_code=400, detail=err)
 
     user = User(nickname=payload.nickname, password_hash=hash_password(payload.password))
     db.add(user)

@@ -8,6 +8,16 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from backend.config import JWT_SECRET, JWT_ALGORITHM, JWT_EXPIRE_MINUTES
 
 security = HTTPBearer()
+import re
+
+def validate_password(password: str) -> str | None:
+    if len(password) < 6:
+        return '密码至少需要 6 位'
+    if not re.search(r'[A-Za-z]', password):
+        return '密码必须包含英文字母'
+    if not re.search(r'[0-9]', password):
+        return '密码必须包含数字'
+    return None
 
 
 def hash_password(password: str) -> str:
@@ -40,3 +50,4 @@ def get_current_user(
 ) -> int:
     """FastAPI dependency – returns the authenticated user_id."""
     return decode_token(credentials.credentials)
+

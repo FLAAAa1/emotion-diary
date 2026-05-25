@@ -28,12 +28,18 @@ with tab1:
 with tab2:
     with st.form("register_form"):
         nick = st.text_input("昵称", key="reg_nick")
-        pw = st.text_input("密码", type="password", key="reg_pw")
+        pw = st.text_input("密码 (至少6位，英文+数字)", type="password", key="reg_pw")
         pw2 = st.text_input("确认密码", type="password", key="reg_pw2")
         submitted = st.form_submit_button("注册", use_container_width=True)
         if submitted:
             if not nick or not pw:
                 st.warning("请填写昵称和密码")
+            elif len(pw) < 6:
+                st.error("密码至少需要 6 位")
+            elif not any(c.isalpha() for c in pw):
+                st.error("密码必须包含英文字母")
+            elif not any(c.isdigit() for c in pw):
+                st.error("密码必须包含数字")
             elif pw != pw2:
                 st.warning("两次密码不一致")
             else:

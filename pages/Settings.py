@@ -84,7 +84,7 @@ with tab_security:
         new = st.text_input(_('new_password'), type='password')
         conf = st.text_input(_('confirm_password'), type='password')
         if st.form_submit_button(_('change_password')):
-            if new != conf:
+            if len(new) < 6:`n                st.error("密码至少需要 6 位")`n            elif not any(c.isalpha() for c in new):`n                st.error("密码必须包含英文字母")`n            elif not any(c.isdigit() for c in new):`n                st.error("密码必须包含数字")`n            elif new != conf:
                 st.error(_('password_mismatch'))
             elif not old or not new:
                 st.warning('请填写完整')
@@ -128,4 +128,5 @@ with tab_about:
 
 if st.sidebar.button(_('back'), use_container_width=True):
     st.switch_page('streamlit_app.py')
+
 

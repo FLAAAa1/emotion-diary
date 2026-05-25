@@ -77,10 +77,16 @@ with tab_security:
     st.subheader(_("change_password"))
     with st.form("pwd_form"):
         old = st.text_input(_("old_password"), type="password")
-        new = st.text_input(_("new_password"), type="password")
+        new = st.text_input(_("new_password") + " (>=6 digits+letters)", type="password")
         conf = st.text_input(_("confirm_password"), type="password")
         if st.form_submit_button(_("change_password")):
-            if new != conf:
+            if len(new) < 6:
+                st.error("密码至少需要 6 位")
+            elif not any(c.isalpha() for c in new):
+                st.error("密码必须包含英文字母")
+            elif not any(c.isdigit() for c in new):
+                st.error("密码必须包含数字")
+            elif new != conf:
                 st.error(_("password_mismatch"))
             elif not old or not new:
                 st.warning("请填写完整")
@@ -119,3 +125,5 @@ with tab_about:
     - 北京心理危机干预中心: **010-82951332**
     - Lifeline: **988**
     """)
+
+
