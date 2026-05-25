@@ -2,10 +2,12 @@
 from backend.schemas.conversation import ChatMessage, MessageOut
 from backend.schemas.diary import DiaryCreate, DiaryOut
 from backend.schemas.settings import UserSettingsOut, UserSettingsUpdate, ChangePasswordRequest
+from backend.schemas.agent import AgentOut, AgentCreate, AgentUpdate, SwitchAgentRequest
 
 __all__ = [
     'UserRegister', 'UserLogin', 'TokenResponse', 'UserOut',
     'ChatMessage', 'MessageOut',
     'DiaryCreate', 'DiaryOut',
     'UserSettingsOut', 'UserSettingsUpdate', 'ChangePasswordRequest',
+    'AgentOut', 'AgentCreate', 'AgentUpdate', 'SwitchAgentRequest',
 ]

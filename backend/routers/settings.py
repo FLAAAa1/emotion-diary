@@ -5,6 +5,7 @@ from backend.database import get_db
 from backend.models.settings import UserSettings
 from backend.models.user import User
 from backend.schemas.settings import UserSettingsOut, UserSettingsUpdate
+from backend.schemas.agent import SwitchAgentRequest
 from backend.auth import get_current_user
 
 router = APIRouter(prefix='/api/settings', tags=['settings'])
@@ -67,3 +68,10 @@ def update_settings(payload: UserSettingsUpdate, user_id: int = Depends(get_curr
         font_size=s.font_size, daily_reminder_enabled=s.daily_reminder_enabled,
         daily_reminder_time=user.daily_reminder_time.strftime('%H:%M') if user and user.daily_reminder_time else None,
     )
+
+@router.put('/agent')
+def switch_agent(payload: SwitchAgentRequest, user_id: int = Depends(get_current_user), db: Session = Depends(get_db)):
+    s = get_or_create_settings(user_id, db)
+    s.current_agent_id = payload.agent_id
+    db.commit()
+    return {'current_agent_id': payload.agent_id}

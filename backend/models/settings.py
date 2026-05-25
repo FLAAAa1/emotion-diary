@@ -14,5 +14,7 @@ class UserSettings(Base):
     emotion_scale = Column(String(5), default='1-10', nullable=False)
     font_size = Column(Integer, default=14, nullable=False)
     daily_reminder_enabled = Column(Integer, default=0, nullable=False)
+    current_agent_id = Column(Integer, ForeignKey('agents.id', ondelete='SET NULL'), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+

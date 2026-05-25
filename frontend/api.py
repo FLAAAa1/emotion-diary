@@ -117,3 +117,33 @@ def delete_account() -> bool:
 def clear_chat_history() -> bool:
     resp = requests.delete(f"{_api_url()}/chat/history", headers=_headers())
     return resp.ok
+
+# ---- Agents ----
+
+def list_agents() -> list:
+    resp = requests.get(f"{_api_url()}/api/agents", headers=_headers())
+    return resp.json() if resp.ok else []
+
+def create_agent(name: str, avatar: str, personality: str, speaking_style: str) -> dict | None:
+    resp = requests.post(f"{_api_url()}/api/agents", json={
+        "name": name, "avatar": avatar, "personality": personality, "speaking_style": speaking_style,
+    }, headers=_headers())
+    return resp.json() if resp.ok else None
+
+def delete_agent(agent_id: int) -> bool:
+    resp = requests.delete(f"{_api_url()}/api/agents/{agent_id}", headers=_headers())
+    return resp.status_code == 204
+
+def switch_agent(agent_id: int | None) -> bool:
+    resp = requests.put(f"{_api_url()}/api/settings/agent", json={"agent_id": agent_id}, headers=_headers())
+    return resp.ok
+
+def get_current_agent() -> dict | None:
+    settings = get_settings()
+    aid = settings.get("current_agent_id")
+    if aid:
+        agents_list = list_agents()
+        for a in agents_list:
+            if a["id"] == aid:
+                return a
+    return None

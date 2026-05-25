@@ -36,6 +36,7 @@ class UserSettingsOut(BaseModel):
     font_size: int = 14
     daily_reminder_enabled: int = 0
     daily_reminder_time: Optional[str] = None
+    current_agent_id: Optional[int] = None
     model_config = {'from_attributes': True}
 
 class UserSettingsUpdate(BaseModel):
@@ -49,7 +50,9 @@ class UserSettingsUpdate(BaseModel):
     font_size: Optional[int] = Field(default=None, ge=10, le=24)
     daily_reminder_enabled: Optional[int] = Field(default=None, ge=0, le=1)
     daily_reminder_time: Optional[str] = None
+    current_agent_id: Optional[int] = None
 
 class ChangePasswordRequest(BaseModel):
     old_password: str
     new_password: str = Field(..., min_length=4, max_length=100)
+
