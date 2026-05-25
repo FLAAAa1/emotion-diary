@@ -36,6 +36,7 @@ def get_settings(user_id: int = Depends(get_current_user), db: Session = Depends
         crisis_sensitivity=s.crisis_sensitivity, emotion_scale=s.emotion_scale,
         font_size=s.font_size, daily_reminder_enabled=s.daily_reminder_enabled,
         daily_reminder_time=user.daily_reminder_time.strftime('%H:%M') if user and user.daily_reminder_time else None,
+        current_agent_id=s.current_agent_id,
     )
 
 @router.put('', response_model=UserSettingsOut)
@@ -67,6 +68,7 @@ def update_settings(payload: UserSettingsUpdate, user_id: int = Depends(get_curr
         crisis_sensitivity=s.crisis_sensitivity, emotion_scale=s.emotion_scale,
         font_size=s.font_size, daily_reminder_enabled=s.daily_reminder_enabled,
         daily_reminder_time=user.daily_reminder_time.strftime('%H:%M') if user and user.daily_reminder_time else None,
+        current_agent_id=s.current_agent_id,
     )
 
 @router.put('/agent')
@@ -75,3 +77,4 @@ def switch_agent(payload: SwitchAgentRequest, user_id: int = Depends(get_current
     s.current_agent_id = payload.agent_id
     db.commit()
     return {'current_agent_id': payload.agent_id}
+
