@@ -1,149 +1,93 @@
 ﻿import streamlit as st
 import requests
 import os
-from typing import Optional, List, Dict, Any
+from typing import Optional, List
 
-# Read API_URL from env var (local) or Streamlit secrets (Cloud)
 API_URL = os.getenv("API_URL", "")
 if not API_URL:
-    try:
-        API_URL = st.secrets["API_URL"]
-    except Exception:
-        pass
+    try: API_URL = st.secrets["API_URL"]
+    except Exception: pass
 
+def _api_url(): return API_URL or "http://127.0.0.1:8000"
 
-def _api_url() -> str:
-    if API_URL:
-        return API_URL
-    return "http://127.0.0.1:8000"
-
-
-def _headers() -> dict:
+def _headers():
     token = st.session_state.get("token")
-    if token:
-        return {"Authorization": f"Bearer {token}"}
-    return {}
+    return {"Authorization": f"Bearer {token}"} if token else {}
 
+def _get(path):
+    try:
+        r = requests.get(f"{_api_url()}{path}", headers=_headers(), timeout=10)
+        return r.json() if r.ok else []
+    except Exception: return []
 
-# ── Auth ──────────────────────────────────────────────────────────────────
+def _post(path, data):
+    try:
+        r = requests.post(f"{_api_url()}{path}", json=data, headers=_headers(), timeout=10)
+        return r.json() if r.ok else {"error": r.text[:200] if r.text else f"status {r.status_code}"}
+    except requests.exceptions.ConnectionError: return {"error": "无法连接后端"}
+    except Exception as e: return {"error": str(e)}
 
-def register(nickname: str, password: str) -> dict:
-    resp = requests.post(f"{_api_url()}/auth/register", json={
-        "nickname": nickname, "password": password,
-    })
-    return resp.json() if resp.ok else {"error": resp.json().get("detail", resp.text)}
+def _put(path, data=None):
+    try:
+        r = requests.put(f"{_api_url()}{path}", json=data, headers=_headers(), timeout=10)
+        return r.ok
+    except Exception: return False
 
+def _delete(path):
+    try:
+        r = requests.delete(f"{_api_url()}{path}", headers=_headers(), timeout=10)
+        return r.status_code == 204
+    except Exception: return False
 
-def login(nickname: str, password: str) -> dict:
-    resp = requests.post(f"{_api_url()}/auth/login", json={
-        "nickname": nickname, "password": password,
-    })
-    return resp.json() if resp.ok else {"error": resp.json().get("detail", resp.text)}
+# Auth
+def register(nickname, password):
+    return _post("/auth/register", {"nickname": nickname, "password": password})
 
+def login(nickname, password):
+    return _post("/auth/login", {"nickname": nickname, "password": password})
 
-# ── Chat ──────────────────────────────────────────────────────────────────
+# Chat
+def send_message(content):
+    r = _post("/chat/", {"content": content})
+    return r if "error" not in r else None
 
-def send_message(content: str) -> Optional[dict]:
-    resp = requests.post(f"{_api_url()}/chat/", json={"content": content}, headers=_headers())
-    return resp.json() if resp.ok else None
+def get_chat_history():
+    return _get("/chat/history")
 
+# Diary
+def create_diary(title, content, mood=None, emotion_score=None, conversation_id=None):
+    d = {"title": title, "content": content}
+    if mood: d["mood"] = mood
+    if emotion_score is not None: d["emotion_score"] = emotion_score
+    if conversation_id is not None: d["conversation_id"] = conversation_id
+    r = _post("/diary/", d)
+    return r if "error" not in r else None
 
-def get_chat_history() -> List[dict]:
-    resp = requests.get(f"{_api_url()}/chat/history", headers=_headers())
-    return resp.json() if resp.ok else []
+def list_diaries(): return _get("/diary/")
+def delete_diary(did): return _delete(f"/diary/{did}")
 
+# Dashboard
+def get_mood_timeline(): return _get("/dashboard/mood-timeline")
+def get_mood_stats(): return _get("/dashboard/stats")
 
-# ── Diary ─────────────────────────────────────────────────────────────────
+# Settings
+def get_settings(): return _get("/api/settings") or {}
+def update_settings(**kw): return _put("/api/settings", kw)
+def change_password(old, new): return _put("/api/user/password", {"old_password": old, "new_password": new})
+def delete_account(): return _delete("/api/user")
+def clear_chat_history(): return _delete("/chat/history")
 
-def create_diary(title: str, content: str, mood: str = None,
-                 emotion_score: float = None, conversation_id: int = None) -> Optional[dict]:
-    payload = {"title": title, "content": content}
-    if mood:
-        payload["mood"] = mood
-    if emotion_score is not None:
-        payload["emotion_score"] = emotion_score
-    if conversation_id is not None:
-        payload["conversation_id"] = conversation_id
-    resp = requests.post(f"{_api_url()}/diary/", json=payload, headers=_headers())
-    return resp.json() if resp.ok else None
-
-
-def list_diaries() -> List[dict]:
-    resp = requests.get(f"{_api_url()}/diary/", headers=_headers())
-    return resp.json() if resp.ok else []
-
-
-def get_diary(diary_id: int) -> Optional[dict]:
-    resp = requests.get(f"{_api_url()}/diary/{diary_id}", headers=_headers())
-    return resp.json() if resp.ok else None
-
-
-def delete_diary(diary_id: int) -> bool:
-    resp = requests.delete(f"{_api_url()}/diary/{diary_id}", headers=_headers())
-    return resp.status_code == 204
-
-
-# ── Dashboard ─────────────────────────────────────────────────────────────
-
-def get_mood_timeline() -> List[dict]:
-    resp = requests.get(f"{_api_url()}/dashboard/mood-timeline", headers=_headers())
-    return resp.json() if resp.ok else []
-
-
-def get_mood_stats() -> List[dict]:
-    resp = requests.get(f"{_api_url()}/dashboard/stats", headers=_headers())
-    return resp.json() if resp.ok else []
-
-# ---- Settings ----
-
-def get_settings() -> dict:
-    resp = requests.get(f"{_api_url()}/api/settings", headers=_headers())
-    return resp.json() if resp.ok else {}
-
-def update_settings(**kwargs) -> bool:
-    resp = requests.put(f"{_api_url()}/api/settings", json=kwargs, headers=_headers())
-    return resp.ok
-
-def change_password(old_pw: str, new_pw: str) -> bool:
-    resp = requests.put(f"{_api_url()}/api/user/password", json={
-        "old_password": old_pw, "new_password": new_pw,
-    }, headers=_headers())
-    return resp.ok
-
-def delete_account() -> bool:
-    resp = requests.delete(f"{_api_url()}/api/user", headers=_headers())
-    return resp.status_code == 204
-
-def clear_chat_history() -> bool:
-    resp = requests.delete(f"{_api_url()}/chat/history", headers=_headers())
-    return resp.ok
-
-# ---- Agents ----
-
-def list_agents() -> list:
-    resp = requests.get(f"{_api_url()}/api/agents", headers=_headers())
-    return resp.json() if resp.ok else []
-
-def create_agent(name: str, avatar: str, personality: str, speaking_style: str) -> dict | None:
-    resp = requests.post(f"{_api_url()}/api/agents", json={
-        "name": name, "avatar": avatar, "personality": personality, "speaking_style": speaking_style,
-    }, headers=_headers())
-    return resp.json() if resp.ok else None
-
-def delete_agent(agent_id: int) -> bool:
-    resp = requests.delete(f"{_api_url()}/api/agents/{agent_id}", headers=_headers())
-    return resp.status_code == 204
-
-def switch_agent(agent_id: int | None) -> bool:
-    resp = requests.put(f"{_api_url()}/api/settings/agent", json={"agent_id": agent_id}, headers=_headers())
-    return resp.ok
-
-def get_current_agent() -> dict | None:
+# Agents
+def list_agents(): return _get("/api/agents")
+def create_agent(name, avatar, personality, speaking_style):
+    r = _post("/api/agents", {"name": name, "avatar": avatar, "personality": personality, "speaking_style": speaking_style})
+    return r if "error" not in r else None
+def delete_agent(aid): return _delete(f"/api/agents/{aid}")
+def switch_agent(aid): return _put("/api/settings/agent", {"agent_id": aid})
+def get_current_agent():
     settings = get_settings()
     aid = settings.get("current_agent_id")
     if aid:
-        agents_list = list_agents()
-        for a in agents_list:
-            if a["id"] == aid:
-                return a
+        for a in list_agents():
+            if a.get("id") == aid: return a
     return None

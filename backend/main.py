@@ -1,5 +1,7 @@
-﻿from fastapi import FastAPI
+﻿from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+import traceback
 
 from backend.database import engine, Base, SessionLocal
 from backend.models import User, Conversation, Diary, UserSettings, Agent
@@ -8,7 +10,6 @@ from backend.seeder import seed_agents
 
 Base.metadata.create_all(bind=engine)
 
-# Seed preset agents
 db = SessionLocal()
 try:
     seed_agents(db)
@@ -27,6 +28,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(
+        status_code=500,
+        content={"detail": str(exc)},
+    )
+
 app.include_router(auth.router)
 app.include_router(conversation.router)
 app.include_router(diary.router)
@@ -39,4 +47,3 @@ app.include_router(agents.router)
 @app.get("/")
 async def root():
     return {"message": "Emotion Diary API is running"}
-
